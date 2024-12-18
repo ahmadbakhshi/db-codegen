@@ -1,6 +1,20 @@
 # db-codegen
 
-`db-codegen` is a tool to generate TypeScript types and Zod schemas from your database schema. It supports MySQL, PostgreSQL, and SQLite databases.
+`db-codegen` is a tool to generate TypeScript types and Zod schemas from your database schema
+
+## Supported Database
+
+- [x] postgres
+- [x] mysql
+- [x] sqlite
+- [ ] mssql
+
+## Supported Generators
+
+- [x] TypeScript
+- [x] Zod
+- [ ] Valibot
+- [ ] TypeBox
 
 ## Installation
 
@@ -14,45 +28,45 @@ npm install db-codegen
 
 1. Create a configuration file in your project root:
 
-```js
-// db-codegen.config.js
+   ```js
+   // db-codegen.config.js
 
-/** @type {import('db-codegen').Config} */
-module.exports = {
-  type: "postgresql", // or "mysql" or "sqlite"
-  connection: {
-    host: "localhost",
-    port: 5432,
-    database: "postgres",
-    username: "postgres",
-    password: "postgres",
-  },
-  output: {
-    directory: "src/generated",
-    generator: [
-      { type: "typescript", output: "types.ts" },
-      { type: "zod", output: "schema.ts" },
-    ],
-    prettierConfig: "../../prettier.config.mjs",
-  },
-};
-```
+   /** @type {import('db-codegen').Config} */
+   module.exports = {
+     type: "postgresql", // or "mysql" or "sqlite"
+     connection: {
+       host: "localhost",
+       port: 5432,
+       database: "postgres",
+       username: "postgres",
+       password: "postgres",
+     },
+     output: {
+       directory: "src/generated",
+       generator: [
+         { type: "typescript", output: "types.ts" },
+         { type: "zod", output: "schema.ts" },
+       ],
+       prettierConfig: "../../prettier.config.mjs",
+     },
+   };
+   ```
 
 2. Add a script to your `package.json` to run the code generator:
 
-```json
-{
-  "scripts": {
-    "db:codegen": "db-codegen --config ./db-codegen.config.js"
-  }
-}
-```
+   ```json
+   {
+     "scripts": {
+       "db:codegen": "db-codegen --config ./db-codegen.config.js"
+     }
+   }
+   ```
 
 3. Run the code generator:
 
-```bash
-npm run db:codegen
-```
+   ```bash
+   npm run db:codegen
+   ```
 
 This will generate TypeScript types and Zod schemas in the specified output directory.
 
