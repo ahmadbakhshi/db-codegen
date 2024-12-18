@@ -54,7 +54,6 @@ export class PostgresGenerator extends BaseGenerator {
   };
 
   private sql: postgres.Sql<{}>;
-  private enumValuesCache: Map<string, string[]> = new Map();
 
   constructor(config: PostgresConfig) {
     super();

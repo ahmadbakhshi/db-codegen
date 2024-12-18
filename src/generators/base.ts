@@ -1,14 +1,15 @@
 import prettier from "prettier";
 
-import { Column } from "../config";
+import { Column, Config } from "../config";
 
 export abstract class BaseGenerator {
   protected abstract pgToTsType: Record<string, string>;
   protected abstract pgToZodSchema: Record<string, string>;
+  enumValuesCache: Map<string, string[]> = new Map();
 
   async formatWithPrettier(
     content: string,
-    configPath?: string
+    configPath?: string,
   ): Promise<string> {
     try {
       const prettierConfig = configPath
@@ -22,7 +23,7 @@ export abstract class BaseGenerator {
     } catch (error) {
       console.warn(
         "Failed to format with prettier, using unformatted output:",
-        error
+        error,
       );
       return content;
     }
@@ -114,13 +115,13 @@ export abstract class BaseGenerator {
 
       // Add type exports
       output += `export type ${this.pascalCase(tableName)} = z.infer<typeof ${this.camelCase(
-        tableName
+        tableName,
       )}Schema>;\n`;
       output += `export type ${this.pascalCase(tableName)}Insert = z.infer<typeof ${this.camelCase(
-        tableName
+        tableName,
       )}InsertSchema>;\n`;
       output += `export type ${this.pascalCase(tableName)}Update = z.infer<typeof ${this.camelCase(
-        tableName
+        tableName,
       )}UpdateSchema>;\n\n`;
     }
 
@@ -128,7 +129,7 @@ export abstract class BaseGenerator {
     output += "export const dbSchema = z.object({\n";
     for (const [tableName, _] of tableMap.entries()) {
       output += `  ${this.camelCase(tableName)}: z.array(${this.camelCase(
-        tableName
+        tableName,
       )}Schema),\n`;
     }
     output += "});\n\n";
@@ -142,7 +143,7 @@ export abstract class BaseGenerator {
     output += "export const dbInsertSchema = z.object({\n";
     for (const [tableName, _] of tableMap.entries()) {
       output += `  ${this.camelCase(tableName)}: ${this.camelCase(
-        tableName
+        tableName,
       )}InsertSchema,\n`;
     }
     output += "});\n\n";
@@ -150,7 +151,7 @@ export abstract class BaseGenerator {
     output += "export const dbUpdateSchema = z.object({\n";
     for (const [tableName, _] of tableMap.entries()) {
       output += `  ${this.camelCase(tableName)}: ${this.camelCase(
-        tableName
+        tableName,
       )}UpdateSchema,\n`;
     }
     output += "});\n\n";
@@ -177,8 +178,44 @@ export abstract class BaseGenerator {
         (result, word, index) =>
           result +
           (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)),
-        ""
+        "",
       );
+  }
+
+  generateEnumTypes(type: Config["type"]): string {
+    if (type === `sqlite`) return "";
+
+    const enumDefinitions: string[] = [];
+
+    for (const [enumName, enumValues] of this.enumValuesCache.entries()) {
+      // Generate TypeScript enum
+      const enumDefinition = `export enum ${this.pascalCase(enumName)} {
+  ${enumValues
+    .map((value) => `${this.formatEnumKey(value)} = "${value}"`)
+    .join(",\n  ")}
+}`;
+
+      enumDefinitions.push(enumDefinition);
+    }
+
+    return enumDefinitions.join("\n\n");
+  }
+
+  private formatEnumKey(value: string): string {
+    // Convert enum value to a valid TypeScript enum key
+    // Replace special characters and spaces with underscores
+    // Ensure it starts with a letter
+    let key = value
+      .replace(/[^a-zA-Z0-9_]/g, "_")
+      .replace(/^(\d)/, "_$1")
+      .toUpperCase();
+
+    // Ensure the key is a valid identifier
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+      key = "_" + key;
+    }
+
+    return key;
   }
 
   abstract getTypeScriptType(column: Column): string;

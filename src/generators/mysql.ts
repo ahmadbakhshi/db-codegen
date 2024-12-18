@@ -54,7 +54,6 @@ export class MySQLGenerator extends BaseGenerator {
 
   private config: MySQLConfig;
   private connection: mysql.Connection | null = null;
-  private enumValuesCache: Map<string, string[]> = new Map();
 
   constructor(config: MySQLConfig) {
     super();
@@ -84,7 +83,7 @@ export class MySQLGenerator extends BaseGenerator {
         WHERE table_schema = ?
         ORDER BY table_name, ordinal_position
         `,
-        [this.config.connection.database]
+        [this.config.connection.database],
       );
 
       // Process and cache enum values during schema fetch
