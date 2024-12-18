@@ -54,6 +54,7 @@ export class PostgresGenerator extends BaseGenerator {
   };
 
   private sql: postgres.Sql<{}>;
+  private enumValuesCache: Map<string, string[]> = new Map();
 
   constructor(config: PostgresConfig) {
     super();
@@ -84,7 +85,25 @@ export class PostgresGenerator extends BaseGenerator {
         ORDER BY table_name, ordinal_position;
       `;
 
-      // Map the result to Column type
+      // Fetch all enum types and their values in a single query
+      const enumTypes = await this.sql<
+        { type_name: string; enum_values: string[] }[]
+      >`
+        SELECT 
+          t.typname as type_name,
+          array_agg(e.enumlabel ORDER BY e.enumsortorder) as enum_values
+        FROM pg_type t
+        JOIN pg_enum e ON t.oid = e.enumtypid
+        JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace
+        WHERE n.nspname = 'public'
+        GROUP BY t.typname;
+      `;
+
+      // Cache the enum values
+      enumTypes.forEach(({ type_name, enum_values }) => {
+        this.enumValuesCache.set(type_name, enum_values);
+      });
+
       return result.map((row) => ({
         table_name: row.table_name,
         column_name: row.column_name,
@@ -106,6 +125,10 @@ export class PostgresGenerator extends BaseGenerator {
     }
 
     if (column.data_type === "USER-DEFINED") {
+      const enumValues = this.enumValuesCache.get(column.udt_name || "");
+      if (enumValues) {
+        return enumValues.map((value) => `"${value}"`).join(" | ");
+      }
       return this.pascalCase(column.udt_name || "");
     }
 
@@ -120,7 +143,14 @@ export class PostgresGenerator extends BaseGenerator {
     }
 
     if (column.data_type === "USER-DEFINED") {
-      return `z.enum([/* Add enum values */])`;
+      const enumValues = this.enumValuesCache.get(column.udt_name || "");
+      if (enumValues) {
+        const formattedValues = enumValues
+          .map((value) => `"${value}"`)
+          .join(", ");
+        return `z.enum([${formattedValues}])`;
+      }
+      return "z.unknown()";
     }
 
     return this.pgToZodSchema[column.data_type] || "z.unknown()";

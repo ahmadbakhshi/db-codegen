@@ -47,4 +47,5 @@ export type Column = {
   is_nullable: string;
   column_default: string | null;
   udt_name?: string;
+  enum_values?: string[]; // Add this line
 };

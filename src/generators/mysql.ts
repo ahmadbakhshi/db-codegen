@@ -54,6 +54,7 @@ export class MySQLGenerator extends BaseGenerator {
 
   private config: MySQLConfig;
   private connection: mysql.Connection | null = null;
+  private enumValuesCache: Map<string, string[]> = new Map();
 
   constructor(config: MySQLConfig) {
     super();
@@ -70,7 +71,7 @@ export class MySQLGenerator extends BaseGenerator {
         database: this.config.connection.database,
       });
 
-      const [rows] = await this.connection.execute(
+      const [rows] = await this.connection.execute<mysql.RowDataPacket[]>(
         `
         SELECT 
           table_name,
@@ -82,17 +83,30 @@ export class MySQLGenerator extends BaseGenerator {
         FROM information_schema.columns 
         WHERE table_schema = ?
         ORDER BY table_name, ordinal_position
-      `,
+        `,
         [this.config.connection.database]
       );
 
-      return (rows as any[]).map((row) => ({
+      // Process and cache enum values during schema fetch
+      rows.forEach((row) => {
+        if (row.DATA_TYPE.toLowerCase() === "enum") {
+          const enumKey = `${row.TABLE_NAME}.${row.COLUMN_NAME}`;
+          const enumValues = this.parseEnumValues(row.COLUMN_TYPE);
+          this.enumValuesCache.set(enumKey, enumValues);
+        }
+      });
+
+      return rows.map((row) => ({
         table_name: row.TABLE_NAME,
         column_name: row.COLUMN_NAME,
         data_type: row.DATA_TYPE.toLowerCase(),
         is_nullable: row.IS_NULLABLE,
         column_default: row.COLUMN_DEFAULT,
         udt_name: row.COLUMN_TYPE,
+        enum_values:
+          row.DATA_TYPE.toLowerCase() === "enum"
+            ? this.parseEnumValues(row.COLUMN_TYPE)
+            : undefined,
       }));
     } finally {
       if (this.connection) {
@@ -104,7 +118,9 @@ export class MySQLGenerator extends BaseGenerator {
   getTypeScriptType(column: Column): string {
     // Handle ENUM types
     if (column.data_type === "enum") {
-      const enumValues = this.parseEnumValues(column.udt_name || "");
+      const enumKey = `${column.table_name}.${column.column_name}`;
+      const enumValues =
+        column.enum_values || this.enumValuesCache.get(enumKey) || [];
       return enumValues.map((v) => `'${v}'`).join(" | ");
     }
 
@@ -119,7 +135,9 @@ export class MySQLGenerator extends BaseGenerator {
   getZodType(column: Column): string {
     // Handle ENUM types
     if (column.data_type === "enum") {
-      const enumValues = this.parseEnumValues(column.udt_name || "");
+      const enumKey = `${column.table_name}.${column.column_name}`;
+      const enumValues =
+        column.enum_values || this.enumValuesCache.get(enumKey) || [];
       return `z.enum([${enumValues.map((v) => `'${v}'`).join(", ")}])`;
     }
 
@@ -134,9 +152,12 @@ export class MySQLGenerator extends BaseGenerator {
   private parseEnumValues(enumType: string): string[] {
     // Parse enum values from MySQL enum type definition
     // e.g., "enum('value1','value2')" -> ["value1", "value2"]
-    const match = enumType.match(/^enum\((.*)\)$/);
+    const match = enumType.match(/^enum\((.*)\)$/i);
     if (!match) return [];
 
-    return match[1].split(",").map((v) => v.trim().replace(/^'|'$/g, ""));
+    return match[1]
+      .split(",")
+      .map((v) => v.trim().replace(/^'|'$/g, ""))
+      .filter(Boolean);
   }
 }
