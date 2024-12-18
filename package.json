@@ -1,0 +1,60 @@
+{
+  "name": "db-codegen",
+  "version": "0.1.0",
+  "description": "Generate TypeScript types and Zod schemas from PostgreSQL,MySql and Sqlite",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "db-codegen": "./bin/db-codegen.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "postbuild": "chmod +x ./bin/db-codegen.js",
+    "dev": "tsc -w",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "postgresql",
+    "mysql",
+    "sqlite",
+    "codegen",
+    "typegen",
+    "typescript",
+    "zod",
+    "generator",
+    "cli",
+    "database"
+  ],
+  "author": "Ahmad Bakhshi",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.0.0",
+    "cosmiconfig": "^8.0.0",
+    "mysql2": "^3.11.5",
+    "postgres": "^3.4.5",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.13",
+    "@types/node": "^18.0.0",
+    "prettier": "^3.3.3",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.5.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
