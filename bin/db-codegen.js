@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// bin/db-typegen.js
+// bin/db-codegen.js
 require("../dist/cli")
   .run()
   .catch((error) => {

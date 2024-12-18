@@ -8,7 +8,7 @@ export async function run() {
   const program = new Command();
 
   program
-    .name("db-typegen")
+    .name("db-codegen")
     .description("Generate TypeScript types and Zod schemas from database")
     .version(require("../package.json").version)
     .option("-c, --config <path>", "path to config file")
@@ -24,7 +24,7 @@ export async function run() {
   const opts = program.opts();
 
   // Load config file
-  const explorer = cosmiconfig("db-typegen");
+  const explorer = cosmiconfig("db-codegen");
   let config: Config;
 
   if (opts.config) {
