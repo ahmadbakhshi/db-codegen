@@ -1,5 +1,7 @@
 # db-codegen
 
+<img src="./public/db-codegen.png" alt="db-codegen" width="300"/>
+
 `db-codegen` is a tool to generate TypeScript types and Zod schemas from your database schema
 
 ## Supported Database
