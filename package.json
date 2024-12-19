@@ -12,14 +12,14 @@
     "bin"
   ],
   "scripts": {
-    "build": "npm run clean && tsc",
+    "build": "tsc",
     "postbuild": "chmod +x ./bin/db-codegen.js",
     "dev": "tsc -w",
     "clean": "rimraf dist",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "jest",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "postgresql",
