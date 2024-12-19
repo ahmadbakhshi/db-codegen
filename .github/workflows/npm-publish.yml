@@ -1,50 +1,25 @@
-name: Publish to npm
+name: Publish to NPM
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    # Only trigger on version tags
-    tags:
-      - "v*"
-  pull_request:
-    branches:
-      - main
-      - master
+  release:
+    types: [created]
 
 jobs:
-  publish:
-    # Only publish on push events (not on pull requests)
-    if: github.event_name == 'push'
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: "18"
           registry-url: "https://registry.npmjs.org"
-          # Enable caching of npm dependencies
-          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
 
-      # - name: Run tests
-      #   run: npm test
-
-      - name: Build (if needed)
-        run: npm run build
-        # Only run if build script exists
-        if: hashFiles('package.json') != '' && contains(fromJson(hashFiles('package.json')), 'build')
-
-      - name: Publish to npm
-        # Only publish if a version tag is pushed
-        if: startsWith(github.ref, 'refs/tags/v')
+      # The clean and build steps are handled by prepublishOnly
+      - name: Publish to NPM
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
