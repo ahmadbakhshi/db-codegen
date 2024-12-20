@@ -1,7 +1,6 @@
 import { Config, MySQLConfig, PostgresConfig } from "../config";
 import { MySQLGenerator } from "./mysql";
 import { PostgresGenerator } from "./postgres";
-import { SQLiteGenerator } from "./sqlite";
 
 function isPostgresConfig(config: Config): config is PostgresConfig {
   return config.type === "postgres";
@@ -31,4 +30,4 @@ export function createGenerator(config: Config) {
   throw new Error(`Unsupported database type: ${(config as any).type}`);
 }
 
-export { PostgresGenerator, MySQLGenerator, SQLiteGenerator };
+export { PostgresGenerator, MySQLGenerator };

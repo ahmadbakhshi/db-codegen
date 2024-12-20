@@ -3,7 +3,6 @@ export type {
   Config,
   PostgresConfig,
   MySQLConfig,
-  SQLiteConfig,
   DatabaseType,
   Column,
 } from "./config";

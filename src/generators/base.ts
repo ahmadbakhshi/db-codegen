@@ -118,9 +118,7 @@ export abstract class BaseGenerator {
     return filteredMap;
   }
 
-  generateEnumTypes(type: Config["type"]): string {
-    if (type === `sqlite`) return "";
-
+  generateEnumTypes(_type: Config["type"]): string {
     const enumDefinitions: string[] = [];
 
     for (const [enumName, enumValues] of this.enumValuesCache.entries()) {
