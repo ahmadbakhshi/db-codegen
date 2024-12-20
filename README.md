@@ -1,6 +1,6 @@
 # db-codegen
 
-<img src="./db-codegen.png" alt="db-codegen" width="300"/>
+<img src="https://github.com/ahmadbakhshi/db-codegen/blob/main/db-codegen.png" alt="db-codegen" width="300"/>
 
 `db-codegen` is a tool to generate TypeScript types and validation schemas based on your database schema.
 
