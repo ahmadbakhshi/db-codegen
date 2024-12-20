@@ -100,7 +100,10 @@ export class PostgresGenerator extends BaseGenerator {
 
       // Cache the enum values
       enumTypes.forEach(({ type_name, enum_values }) => {
-        this.enumValuesCache.set(type_name, enum_values);
+        this.enumValuesCache.set(
+          this.pascalCase(type_name + "Enum"),
+          enum_values
+        );
       });
 
       return result.map((row) => ({
@@ -124,10 +127,9 @@ export class PostgresGenerator extends BaseGenerator {
     }
 
     if (column.data_type === "USER-DEFINED") {
-      const enumValues = this.enumValuesCache.get(column.udt_name || "");
-      if (enumValues) {
-        return enumValues.map((value) => `"${value}"`).join(" | ");
-      }
+      const enumName = this.pascalCase(column.udt_name + "Enum");
+      const enumValues = this.enumValuesCache.get(enumName || "");
+      if (enumValues) return `${enumName}`;
       return this.pascalCase(column.udt_name || "");
     }
 

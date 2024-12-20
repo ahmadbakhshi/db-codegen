@@ -62,12 +62,15 @@ export class MySQLGenerator extends BaseGenerator {
 
   async fetchSchema(): Promise<Column[]> {
     try {
-      this.connection = await mysql.createConnection({
+      this.connection = mysql.createPool({
         host: this.config.connection.host,
-        port: this.config.connection.port,
         user: this.config.connection.username,
         password: this.config.connection.password,
         database: this.config.connection.database,
+        port: this.config.connection.port,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
       });
 
       const [rows] = await this.connection.execute<mysql.RowDataPacket[]>(
@@ -83,13 +86,13 @@ export class MySQLGenerator extends BaseGenerator {
         WHERE table_schema = ?
         ORDER BY table_name, ordinal_position
         `,
-        [this.config.connection.database],
+        [this.config.connection.database]
       );
 
       // Process and cache enum values during schema fetch
       rows.forEach((row) => {
         if (row.DATA_TYPE.toLowerCase() === "enum") {
-          const enumKey = `${row.TABLE_NAME}.${row.COLUMN_NAME}`;
+          const enumKey = `${this.pascalCase(row.COLUMN_NAME)}Enum`;
           const enumValues = this.parseEnumValues(row.COLUMN_TYPE);
           this.enumValuesCache.set(enumKey, enumValues);
         }
@@ -117,10 +120,8 @@ export class MySQLGenerator extends BaseGenerator {
   getTypeScriptType(column: Column): string {
     // Handle ENUM types
     if (column.data_type === "enum") {
-      const enumKey = `${column.table_name}.${column.column_name}`;
-      const enumValues =
-        column.enum_values || this.enumValuesCache.get(enumKey) || [];
-      return enumValues.map((v) => `'${v}'`).join(" | ");
+      const enumKey = `${this.pascalCase(column.column_name + "Enum")}`;
+      return `${enumKey}`;
     }
 
     // Handle boolean represented as TINYINT(1)
@@ -134,9 +135,8 @@ export class MySQLGenerator extends BaseGenerator {
   getZodType(column: Column): string {
     // Handle ENUM types
     if (column.data_type === "enum") {
-      const enumKey = `${column.table_name}.${column.column_name}`;
-      const enumValues =
-        column.enum_values || this.enumValuesCache.get(enumKey) || [];
+      const enumKey = `${this.pascalCase(column.column_name + "Enum")}`;
+      const enumValues = this.enumValuesCache.get(enumKey) || [];
       return `z.enum([${enumValues.map((v) => `'${v}'`).join(", ")}])`;
     }
 

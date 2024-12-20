@@ -17,7 +17,7 @@ export async function run() {
     .option("--db <database>", "database name")
     .option("--user <username>", "database username")
     .option("--pass <password>", "database password")
-    .option("--type <type>", "database type (postgresql, mysql, or sqlite)")
+    .option("--type <type>", "database type (postgres, mysql, or sqlite)")
     .option("--out-dir <path>", "output directory")
     .parse(process.argv);
 
@@ -47,7 +47,7 @@ export async function run() {
   }
 
   if (opts.host || opts.port || opts.db || opts.user || opts.pass) {
-    if (config.type === "postgresql" || config.type === "mysql") {
+    if (config.type === "postgres" || config.type === "mysql") {
       if (opts.host) config.connection.host = opts.host;
       if (opts.port) config.connection.port = parseInt(opts.port, 10);
       if (opts.db) config.connection.database = opts.db;

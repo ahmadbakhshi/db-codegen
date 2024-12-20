@@ -1,16 +1,20 @@
-export type DatabaseType = "postgresql" | "sqlite" | "mysql";
+export type DatabaseType = "postgres" | "mysql";
 
 interface BaseConfig {
   type: DatabaseType;
   output: {
     directory: string;
-    generator: { type: "zod" | "typescript"; output: string }[];
+    generator: {
+      type: "zod" | "typescript";
+      output: string;
+      tables?: string[];
+    }[];
     prettierConfig?: string;
   };
 }
 
 export interface PostgresConfig extends BaseConfig {
-  type: "postgresql";
+  type: "postgres";
   connection: {
     host: string;
     port: number;
@@ -20,12 +24,12 @@ export interface PostgresConfig extends BaseConfig {
   };
 }
 
-export interface SQLiteConfig extends BaseConfig {
-  type: "sqlite";
-  connection: {
-    filename: string;
-  };
-}
+// export interface SQLiteConfig extends BaseConfig {
+//   type: "sqlite";
+//   connection: {
+//     filename: string;
+//   };
+// }
 
 export interface MySQLConfig extends BaseConfig {
   type: "mysql";
@@ -38,7 +42,7 @@ export interface MySQLConfig extends BaseConfig {
   };
 }
 
-export type Config = PostgresConfig | SQLiteConfig | MySQLConfig;
+export type Config = PostgresConfig | MySQLConfig;
 
 export type Column = {
   table_name: string;
@@ -49,3 +53,13 @@ export type Column = {
   udt_name?: string;
   enum_values?: string[]; // Add this line
 };
+
+export interface ComplexTypeColumn {
+  name: string;
+  type: string;
+}
+
+export interface ComplexType {
+  name: string;
+  columns: ComplexTypeColumn[];
+}

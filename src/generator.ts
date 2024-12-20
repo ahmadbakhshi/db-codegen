@@ -23,16 +23,18 @@ export async function generateTypesAndSchemas(config: Config) {
 
     let content = "";
     if (gen.type === "typescript") {
-      content = generator.generateTypeScriptContent(tableMap);
+      const filteredTableMap = generator.filterTableMap(tableMap, gen.tables);
+      content = generator.generateTypeScriptContent(filteredTableMap);
       content += generator.generateEnumTypes(config.type);
     } else if (gen.type === "zod") {
-      content = generator.generateZodContent(tableMap);
+      const filteredTableMap = generator.filterTableMap(tableMap, gen.tables);
+      content = generator.generateZodContent(filteredTableMap);
     }
 
     // Format with prettier if configured
     const formattedContent = await generator.formatWithPrettier(
       content,
-      config.output.prettierConfig,
+      config.output.prettierConfig
     );
 
     // Ensure directory exists

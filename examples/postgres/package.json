@@ -1,0 +1,15 @@
+{
+  "name": "db-codegen-example",
+  "version": "1.0.0",
+  "description": "Example project for db-codegen",
+  "main": "index.js",
+  "scripts": {
+    "init": "tsx index.ts",
+    "db-codegen": "../../bin/db-codegen.js --config ./db-codegen.config.js"
+  },
+  "author": "Ahmad Bakhshi",
+  "license": "MIT",
+  "devDependencies": {
+    "tsx": "^3.12.7"
+  }
+}

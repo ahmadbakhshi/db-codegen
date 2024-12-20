@@ -1,6 +1,6 @@
 # db-codegen
 
-<img src="./public/db-codegen.png" alt="db-codegen" width="300"/>
+<img src="./db-codegen.png" alt="db-codegen" width="300"/>
 
 `db-codegen` is a tool to generate TypeScript types and validation schemas based on your database schema.
 
@@ -8,7 +8,7 @@
 
 - [x] postgres
 - [x] mysql
-- [x] sqlite
+- [ ] sqlite
 - [ ] mssql
 
 ## Supported Generators
@@ -35,7 +35,7 @@ npm install db-codegen
 
    /** @type {import('db-codegen').Config} */
    module.exports = {
-     type: "postgresql", // or "mysql" or "sqlite"
+     type: "postgres", // or "mysql"
      connection: {
        host: "localhost",
        port: 5432,
@@ -76,16 +76,16 @@ This will generate TypeScript types and Zod schemas in the specified output dire
 
 The configuration file should export an object of type `Config`. Here are the available options:
 
-- `type`: The type of database (`"postgresql"`, `"mysql"`, or `"sqlite"`).
+- `type`: The type of database (`"postgres"` or `"mysql"`).
 - `connection`: The connection details for your database.
-  - For PostgreSQL and MySQL:
+
+  - For Postgres and MySQL:
     - `host`: The database host.
     - `port`: The database port.
     - `database`: The database name.
     - `username`: The database username.
     - `password`: The database password.
-  - For SQLite:
-    - `filename`: The path to the SQLite database file.
+
 - `output`: The output configuration.
   - `directory`: The directory where the generated files will be saved.
   - `generator`: An array of generators to use.

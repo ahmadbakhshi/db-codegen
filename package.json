@@ -1,7 +1,7 @@
 {
   "name": "db-codegen",
   "version": "0.1.4",
-  "description": "Generate TypeScript types and Zod schemas from PostgreSQL,MySql and Sqlite",
+  "description": "Generate TypeScript types and Zod schemas from Postgres,MySql and Sqlite",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
@@ -13,16 +13,17 @@
   ],
   "scripts": {
     "build": "tsc",
+    "prebuild": "npm run clean",
     "postbuild": "chmod +x ./bin/db-codegen.js",
     "dev": "tsc -w",
     "clean": "rimraf dist",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "test": "jest",
+    "test": "vitest",
     "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
-    "postgresql",
+    "postgres",
     "mysql",
     "sqlite",
     "codegen",
@@ -45,10 +46,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.13",
     "@types/node": "^18.0.0",
+    "pg": "^8.13.1",
     "prettier": "^3.3.3",
     "rimraf": "^5.0.0",
+    "tsx": "^3.12.7",
     "typescript": "^5.5.3"
   },
   "publishConfig": {
